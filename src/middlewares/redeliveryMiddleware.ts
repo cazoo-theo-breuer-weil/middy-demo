@@ -7,19 +7,21 @@ const isDuplicateEventID = async (id: string): Promise<boolean> => {
     return true;
 };
 
-export class RedeliveryMiddleware<T extends ScheduledEvent<unknown>, R>
-    implements middy.MiddlewareObject<T, R, CustomContext> {
+export class RedeliveryMiddleware<
+    T extends ScheduledEvent<unknown>,
+    R = void
+> implements middy.MiddlewareObject<T, R, CustomContext> {
     public before: middy.MiddlewareFunction<T, R, CustomContext> = async (
-        { event, callback, context },
+        { event, callback, context: { logger } },
         next,
     ) => {
         try {
             if (await isDuplicateEventID(event.id)) {
-                context.logger.info('duplicate event, aborting');
+                logger.info('duplicate event, aborting');
                 callback();
             }
         } catch (error) {
-            context.logger.recordError(
+            logger.recordError(
                 error,
                 'could not check for event redelivery',
             );

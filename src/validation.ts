@@ -9,8 +9,12 @@ export const ExampleEventPayload = t.interface({
 export type ExampleEventPayload = t.TypeOf<typeof ExampleEventPayload>;
 export type ExampleEvent = ScheduledEvent<ExampleEventPayload>;
 
-export const validateEvent = (
-    event: ScheduledEvent<unknown>,
-): event is ExampleEvent => {
-    return 'detail' in event && ExampleEventPayload.is(event.detail);
+export const isScheduledEvent = (event: any): event is ScheduledEvent => {
+    return 'detail' in event;
+};
+
+export const validateEvent = (event: unknown): event is ExampleEvent => {
+    return (
+        isScheduledEvent(event) && ExampleEventPayload.is(event.detail)
+    );
 };

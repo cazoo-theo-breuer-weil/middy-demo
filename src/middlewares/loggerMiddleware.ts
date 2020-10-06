@@ -7,7 +7,7 @@ import { CustomContext } from './types';
 
 type LoggerConstructor = (event: AnyEvent, context: Context) => Logger;
 
-export class LoggerMiddleware<T extends AnyEvent, R>
+export class LoggerMiddleware<T extends AnyEvent, R = void>
     implements middy.MiddlewareObject<T, R, CustomContext> {
     private readonly loggerConstructor: LoggerConstructor;
 
@@ -19,33 +19,31 @@ export class LoggerMiddleware<T extends AnyEvent, R>
         handler,
         next,
     ) => {
-        const logger = this.loggerConstructor(
-            handler.event,
-            handler.context,
-        );
+        const { event, context } = handler;
+        const logger = this.loggerConstructor(event, context);
+        logger.withData({ event }).info('invoked');
 
-        logger.withData({ event: handler.event }).info('invoked');
-        handler.context.logger = logger;
+        handler.context = {
+            ...context,
+            logger,
+        };
+
         next();
     };
 
     public after: middy.MiddlewareFunction<T, R, CustomContext> = (
-        handler,
+        { context: { logger } },
         next,
     ) => {
-        handler.context.logger.info('successfully handled event');
+        logger.info('successfully handled event');
         next();
     };
 
     public onError: middy.MiddlewareFunction<T, R, CustomContext> = (
-        handler,
+        { context: { logger }, error },
         next,
     ) => {
-        handler.context.logger.recordError(
-            handler.error,
-            'encountered unhandled error',
-        );
-
-        next(handler.error);
+        logger.recordError(error, 'encountered unhandled error');
+        next(error);
     };
 }

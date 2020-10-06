@@ -3,25 +3,25 @@ import middy from '@middy/core';
 import { CustomContext } from './types';
 import { AnyEvent } from '@cazoo/telemetry/dist/events/anyEvent';
 
-export class ValidationMiddleware<T extends AnyEvent, C>
-    implements middy.MiddlewareObject<T, C, CustomContext> {
+export class ValidationMiddleware<T extends AnyEvent, R = void>
+    implements middy.MiddlewareObject<T, R, CustomContext> {
     private readonly validate: (event: unknown) => event is T;
 
     public constructor(validate: (event: unknown) => event is T) {
         this.validate = validate;
     }
 
-    public before: middy.MiddlewareFunction<T, C, CustomContext> = (
-        { context, event },
+    public before: middy.MiddlewareFunction<T, R, CustomContext> = (
+        { context: { logger, trace }, event },
         next,
     ) => {
-        const processTrace = context.trace
-            ? context.trace.startChild('validation')
+        const processTrace = trace
+            ? trace.startChild('validation')
             : null;
 
         try {
             if (!this.validate(event)) {
-                context.logger.error('event failed validation');
+                logger.error('event failed validation');
                 throw new Error('invalid');
             }
 

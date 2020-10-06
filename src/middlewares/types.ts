@@ -4,5 +4,5 @@ import { Trace } from '@cazoo/telemetry';
 
 export interface CustomContext extends Context {
     logger: Logger;
-    trace?: Trace;
+    trace: Trace | null;
 }

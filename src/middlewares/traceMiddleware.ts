@@ -4,7 +4,7 @@ import { Telemetry } from '@cazoo/telemetry';
 import { CustomContext } from './types';
 import { AnyEvent } from '@cazoo/telemetry/dist/events/anyEvent';
 
-export class TraceMiddleware<T extends AnyEvent, R>
+export class TraceMiddleware<T extends AnyEvent, R = void>
     implements middy.MiddlewareObject<T, R, CustomContext> {
     private readonly rootTraceName: string;
 
@@ -16,28 +16,33 @@ export class TraceMiddleware<T extends AnyEvent, R>
         handler,
         next,
     ) => {
-        handler.context.trace = Telemetry.startWithContext(
-            this.rootTraceName,
-            handler.event,
-            handler.context,
-        );
+        const { event, context } = handler;
+
+        handler.context = {
+            ...context,
+            trace: Telemetry.startWithContext(
+                this.rootTraceName,
+                event,
+                context,
+            ),
+        };
 
         next();
     };
 
     public after: middy.MiddlewareFunction<T, R, CustomContext> = async (
-        handler,
+        { context: { trace } },
         next,
     ) => {
-        handler.context.trace.end();
+        trace && trace.end();
         next();
     };
 
     public onError: middy.MiddlewareFunction<T, R, CustomContext> = (
-        handler,
+        { context: { trace }, error },
         next,
     ) => {
-        handler.context.trace.end();
-        next(handler.error);
+        trace && trace.endWithError(error);
+        next(error);
     };
 }

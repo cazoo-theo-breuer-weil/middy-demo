@@ -5,6 +5,8 @@ export const someBusinessLogic = async (
     event: ExampleEvent,
     context: CustomContext,
 ): Promise<void> => {
-    context.trace.startChild('innerTrace').end();
+    const trace =
+        context.trace && context.trace.startChild('innerTrace').end();
+
     return;
 };
