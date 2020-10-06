@@ -1,21 +1,21 @@
 import { Context } from 'aws-lambda';
 import { Logger } from 'cazoo-logger';
 import { AnyEvent } from '@cazoo/telemetry/dist/events/anyEvent';
-import { default as middy } from '@middy/core';
+import { MiddlewareObject, MiddlewareFunction } from 'middy';
 
 import { CustomContext } from './types';
 
 type LoggerConstructor = (event: AnyEvent, context: Context) => Logger;
 
 export class LoggerMiddleware<T extends AnyEvent, R = void>
-    implements middy.MiddlewareObject<T, R, CustomContext> {
+    implements MiddlewareObject<T, R, CustomContext> {
     private readonly loggerConstructor: LoggerConstructor;
 
     public constructor(loggerConstructor: LoggerConstructor) {
         this.loggerConstructor = loggerConstructor;
     }
 
-    public before: middy.MiddlewareFunction<T, R, CustomContext> = (
+    public before: MiddlewareFunction<T, R, CustomContext> = (
         handler,
         next,
     ) => {
@@ -31,7 +31,7 @@ export class LoggerMiddleware<T extends AnyEvent, R = void>
         next();
     };
 
-    public after: middy.MiddlewareFunction<T, R, CustomContext> = (
+    public after: MiddlewareFunction<T, R, CustomContext> = (
         { context: { logger } },
         next,
     ) => {
@@ -39,7 +39,7 @@ export class LoggerMiddleware<T extends AnyEvent, R = void>
         next();
     };
 
-    public onError: middy.MiddlewareFunction<T, R, CustomContext> = (
+    public onError: MiddlewareFunction<T, R, CustomContext> = (
         { context: { logger }, error },
         next,
     ) => {

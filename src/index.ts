@@ -1,5 +1,8 @@
-import { empty } from 'cazoo-logger';
 import { default as middy } from '@middy/core';
+
+import { buildLogger } from './logger';
+import { someBusinessLogic } from './handler';
+import { ExampleEvent, validateEvent } from './validation';
 
 import {
     CustomContext,
@@ -10,11 +13,7 @@ import {
     ValidationMiddleware,
 } from './middlewares';
 
-import { someBusinessLogic } from './handler';
-import { ExampleEvent, validateEvent } from './validation';
-
 type Handler = (e: ExampleEvent, context: CustomContext) => Promise<void>;
-const buildLogger = () => empty();
 
 export const handler = middy<Handler, CustomContext>(someBusinessLogic)
     .before(injectBaseCustomContext)

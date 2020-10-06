@@ -1,18 +1,18 @@
-import { default as middy } from '@middy/core';
 import { Telemetry } from '@cazoo/telemetry';
+import { AnyEvent } from '@cazoo/telemetry/dist/events/anyEvent';
+import { MiddlewareFunction, MiddlewareObject } from 'middy';
 
 import { CustomContext } from './types';
-import { AnyEvent } from '@cazoo/telemetry/dist/events/anyEvent';
 
 export class TraceMiddleware<T extends AnyEvent, R = void>
-    implements middy.MiddlewareObject<T, R, CustomContext> {
+    implements MiddlewareObject<T, R, CustomContext> {
     private readonly rootTraceName: string;
 
     public constructor(rootTraceName: string) {
         this.rootTraceName = rootTraceName;
     }
 
-    public before: middy.MiddlewareFunction<T, R, CustomContext> = (
+    public before: MiddlewareFunction<T, R, CustomContext> = (
         handler,
         next,
     ) => {
@@ -30,7 +30,7 @@ export class TraceMiddleware<T extends AnyEvent, R = void>
         next();
     };
 
-    public after: middy.MiddlewareFunction<T, R, CustomContext> = async (
+    public after: MiddlewareFunction<T, R, CustomContext> = async (
         { context: { trace } },
         next,
     ) => {
@@ -38,7 +38,7 @@ export class TraceMiddleware<T extends AnyEvent, R = void>
         next();
     };
 
-    public onError: middy.MiddlewareFunction<T, R, CustomContext> = (
+    public onError: MiddlewareFunction<T, R, CustomContext> = (
         { context: { trace }, error },
         next,
     ) => {

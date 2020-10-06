@@ -1,6 +1,6 @@
 import { Context } from 'aws-lambda';
 import { empty } from 'cazoo-logger';
-import middy from '@middy/core';
+import { MiddlewareFunction } from 'middy';
 
 import { CustomContext } from './types';
 
@@ -12,7 +12,7 @@ export const createCustomContext = (context: Context): CustomContext => {
     };
 };
 
-export const injectBaseCustomContext: middy.MiddlewareFunction<
+export const injectBaseCustomContext: MiddlewareFunction<
     any,
     any,
     CustomContext
